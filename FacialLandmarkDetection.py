@@ -35,10 +35,21 @@ class FacialLandmarkDetector:
         cv2.imwrite(destination+"/"+imgName,self.img)
     def normalize(self, parts):
         mean = (sum([value[0] for value in parts]) / float(len(parts)), sum([value[1] for value in parts]) / float(len(parts)))
-        normalized = []
+        
+        #subtract every point with mean
+        newPoint = []
         for part in parts:
             #think about normalizes by variance
-            normalized.append(tuple(numpy.subtract(part, mean)))
+            newPoint.append(tuple(numpy.subtract(part, mean)))
+        #find max point value after subtraction
+        normalized = []
+        max_X = abs(max(newPoint, key = lambda item:abs(item[0]))[0])
+        max_Y = abs(max(newPoint, key = lambda item:abs(item[1]))[1])
+        maxValue = max(max_X, max_Y)
+        
+        for point in newPoint:
+            #think about normalizes by variance
+            normalized.append(tuple(numpy.divide(point, maxValue)))
         return normalized
 
     #detects facial landmarks based
@@ -100,12 +111,14 @@ class FacialLandmarkDetector:
                     cv2.circle(self.img,(self.shape.part(i).x,self.shape.part(i).y), 2, (0,0,255), -1)
         return foundParts
     def extractFacePart(self, facePart):
-        region = None
+        self.region = None
         if facePart == "EyeRegion":
             parts = self.getFacialLandmarksOfFacePart(["RightEye", "LeftEye", "RightEyebrow", "LeftEyebrow"])
             self.top, self.left, self.bottom, self.right = maxRectangle(parts)
             self.bottom += 10
             self.region = self.img[self.top:self.bottom, self.left:self.right]
+        if facePart == "Nose":
+            parts = self.getFacialLandmarksOfFacePart(["Nose"])
         return self.region
     def replaceImagePart(self, newROI):
 
@@ -190,12 +203,12 @@ def maxRectangle(parts):
     return maxTop, maxLeft, maxBottom, maxRight
 
 if __name__ == "__main__":
-    image_name = "/home/matej/FER_current/Projekt/Project_Deidentification_Kazemi/baza_XMVTS2/000/000_1_1.ppm"
+    image_name = "/home/matej/Diplomski/baze/baza_XMVTS2/000/000_1_1.ppm"
     detector = FacialLandmarkDetector(image_name)
     #detector.detect_frontal_face(True)
     detector.showImage()
-    #parts = detector.detectFacialLandmarks(True)
-    #detector.showImage()
+    parts = detector.detectFacialLandmarks(True)
+    detector.showImage()
     #print(parts)
     #foundParts = detector.getFacialLandmarksOfFacePart(["Nose", "Mouth"], True)
     #detector.showImage()
