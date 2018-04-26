@@ -114,11 +114,17 @@ class FacialLandmarkDetector:
         self.region = None
         if facePart == "EyeRegion":
             parts = self.getFacialLandmarksOfFacePart(["RightEye", "LeftEye", "RightEyebrow", "LeftEyebrow"])
-            self.top, self.left, self.bottom, self.right = maxRectangle(parts)
-            self.bottom += 10
-            self.region = self.img[self.top:self.bottom, self.left:self.right]
         if facePart == "Nose":
             parts = self.getFacialLandmarksOfFacePart(["Nose"])
+        if facePart == "Mouth":
+            parts = self.getFacialLandmarksOfFacePart(["Mouth"])
+        if facePart == "Face":
+            parts = self.getFacialLandmarksOfFacePart(["RightEye", "LeftEye", "RightEyebrow", "LeftEyebrow", "Mouth"])
+            
+        self.top, self.left, self.bottom, self.right = maxRectangle(parts)
+        self.bottom += 10
+        self.region = self.img[self.top:self.bottom, self.left:self.right]
+
         return self.region
     def replaceImagePart(self, newROI):
 
@@ -213,6 +219,6 @@ if __name__ == "__main__":
     #foundParts = detector.getFacialLandmarksOfFacePart(["Nose", "Mouth"], True)
     #detector.showImage()
     #print(foundParts)
-    ROI = detector.extractFacePart("EyeRegion")
-    cv2.imshow('image',ROI)
+    #ROI = detector.extractFacePart("EyeRegion")
+    #cv2.imshow('image',ROI)
     cv2.waitKey(0)

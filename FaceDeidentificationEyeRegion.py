@@ -170,17 +170,51 @@ def getImagePath(database_folder, imageName):
     return imagePath
 
 #Method is used to replace eye region of given image with template image
-def replaceEyeRegionOfImageWithTemplate(imagePath, templatePath, showImage=True):
+def replaceEyeRegionOfImageWithTemplate(imagePath, templatePath, parts=["Mouth", "EyeRegion", "Nose"], showImage=True):
     detectorImage = FacialLandmarkDetector(imagePath)
     detectorTemplate = FacialLandmarkDetector(templatePath)
-    eyeRegionImage = detectorImage.extractFacePart("EyeRegion")
-    eyeRegionTemplate = detectorTemplate.extractFacePart("EyeRegion")
-    resized_image = cv2.resize(eyeRegionTemplate, (eyeRegionImage.shape[1], eyeRegionImage.shape[0]) )
+    
     if showImage == True:
         detectorImage.showImage()
-    detectorImage.replaceImagePart(resized_image)
-    if showImage == True:
-        detectorImage.showImage(gray=False)
+        
+    #EYE REGION
+    if "EyeRegion" in parts:
+        eyeRegionImage = detectorImage.extractFacePart("EyeRegion")
+        eyeRegionTemplate = detectorTemplate.extractFacePart("EyeRegion")
+        resized_image = cv2.resize(eyeRegionTemplate, (eyeRegionImage.shape[1], eyeRegionImage.shape[0]) )
+        
+        detectorImage.replaceImagePart(resized_image)
+        if showImage == True:
+            detectorImage.showImage(gray=False)
+        
+    #NOSE REGION
+    if "Nose" in parts:
+        noseRegionImage = detectorImage.extractFacePart("Nose")
+        noseRegionTemplate = detectorTemplate.extractFacePart("Nose")
+        resized_image = cv2.resize(noseRegionTemplate, (noseRegionImage.shape[1], noseRegionImage.shape[0]) )
+        
+        detectorImage.replaceImagePart(resized_image)
+        if showImage == True:
+            detectorImage.showImage(gray=False)
+        
+    #MOUTH
+    if "Mouth" in parts:
+        mouthRegionImage = detectorImage.extractFacePart("Mouth")
+        mouthRegionTemplate = detectorTemplate.extractFacePart("Mouth")
+        resized_image = cv2.resize(mouthRegionTemplate, (mouthRegionImage.shape[1], mouthRegionImage.shape[0]) )
+        
+        detectorImage.replaceImagePart(resized_image)
+        if showImage == True:
+            detectorImage.showImage(gray=False)
+    if "Face" in parts:
+        faceRegionImage = detectorImage.extractFacePart("Face")
+        faceRegionTemplate = detectorTemplate.extractFacePart("Face")
+        resized_image = cv2.resize(faceRegionTemplate, (faceRegionImage.shape[1], faceRegionImage.shape[0]) )
+        
+        detectorImage.replaceImagePart(resized_image)
+        if showImage == True:
+            detectorImage.showImage(gray=False)
+            
     return detectorImage.getImage()
 
 #Method turns whole database to gray images
@@ -216,7 +250,7 @@ def databaseToGrayScale(database_folder, destinationFolder, numImages, firstImag
 #Method is used to deidentifyImages.
 #numImages - parameter determines how many images will be deidentified
 #gray - parameter determines if gray images will be used
-def deidentifyImages(database_folder, destinationFolder, templates_database, numImages, gray=False):
+def deidentifyImages(database_folder, destinationFolder, templates_database, numImages,  parts=["Mouth", "EyeRegion", "Nose"], gray=False, ):
     loader = DatabaseLoaderXMVTS2(database_folder)
     images_paths = loader.loadDatabase("ppm", "1")
     dir_i = 1
@@ -238,12 +272,13 @@ def deidentifyImages(database_folder, destinationFolder, templates_database, num
         destination = destination + "/" + imageName
 
         templates_positions = loadTemplatesPositions(templates_database)#load positions of template from txt file
+        
         image_positions = loadDatabaseImage_CalculateFacialLandmarks(destination, imagePath, False) #calculate landmarks
-        closest_Index = find_closest_Image(image_positions, templates_positions, 1) #find k-th closest image index
+        closest_Index = find_closest_Image(image_positions, templates_positions, k=4) #find k-th closest image index
         closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index] # get closest image path
         print(closest_Image_path)
-        replacedImg = replaceEyeRegionOfImageWithTemplate(imagePath, closest_Image_path, showImage=False) #replace eyeregion
-
+        replacedImg = replaceEyeRegionOfImageWithTemplate(imagePath, closest_Image_path, parts, showImage=False) #replace eyeregion
+        
         if gray == True:
             replacedImg = cv2.cvtColor(replacedImg, cv2.COLOR_BGR2GRAY)
         cv2.imwrite(destination,replacedImg)
@@ -264,13 +299,13 @@ if __name__ == "__main__":
 
         #findFacialLandmarksOnTemplateImages(templates_database, templates_destination, False, False, True)
         #findFacialLandmarksOnTemplateImages_EyeRegion(templates_database, templates_destination, True, False, False)
-        imagePath = getImagePath(destination,"001")
+        imagePath = getImagePath(destination,"008")
         templates_positions = loadTemplatesPositions(templates_database)
         image_positions = loadDatabaseImage_CalculateFacialLandmarks(destination, imagePath, False)
         closest_Index = find_closest_Image(image_positions, templates_positions, 1)
         closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index]
         print(closest_Image_path)
-        replaceEyeRegionOfImageWithTemplate(imagePath, closest_Image_path)
+        replaceEyeRegionOfImageWithTemplate(imagePath, closest_Image_path, parts = ["EyeRegion", "Nose", "Mouth"])
     elif operation == 2:
         databaseToGrayScale(databaseImages_3, deidentifiedImages, 40,firstImageNum = 2,  lastImageNum = 3, grayScale=True)
     elif operation == 3:
