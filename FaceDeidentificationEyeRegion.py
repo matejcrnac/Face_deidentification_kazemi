@@ -6,12 +6,22 @@ import collections
 
 
 #Used paths
+man_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/man_no_glasses"
+man_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/man_glasses"
+woman_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_no_glasses"
+woman_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_glasses"
+
+
 XMVTS2_database = "/home/matej/Diplomski/baze/baza_XMVTS2"
 destination = "/home/matej/Diplomski/baze/baza_deidentification_Images"
-templates_database = "/home/matej/Diplomski/baze/baza_templates"
+templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
+
+
 templates_destination = "/home/matej/Diplomski/baze/KazemiTemplates"
+
 XMVTS2_gray_faceReq = "/home/matej/Diplomski/baze/baza_XMVTS2_gray_facereq"
-deidentifiedImages = "/home/matej/Diplomski/baze/deidentifiedImages"
+
+deidentifiedImages = "/home/matej/Diplomski/baze/deidentification_destination"
 databaseImages_2 = "/home/matej/Diplomski/baze/baza_deidentification_Images_2"
 databaseImages_3 = "/home/matej/Diplomski/baze/baza_deidentification_Images_3"
 
@@ -250,30 +260,32 @@ def databaseToGrayScale(database_folder, destinationFolder, numImages, firstImag
 #Method is used to deidentifyImages.
 #numImages - parameter determines how many images will be deidentified
 #gray - parameter determines if gray images will be used
-def deidentifyImages(database_folder, destinationFolder, templates_database, numImages,  parts=["Mouth", "EyeRegion", "Nose"], gray=False, ):
+def deidentifyImages(database_folder, destinationFolder, templates_database, numImages,  description,  parts=["Mouth", "EyeRegion", "Nose"], gray=False, write_original=True):
     loader = DatabaseLoaderXMVTS2(database_folder)
     images_paths = loader.loadDatabase("ppm", "1")
     dir_i = 1
     i = 0
-    print("Building gray database ....")
+    
     for imagePath in images_paths:  #for each image
         if dir_i > numImages:
             break
-        #imagePathArray = imagePath.split("/")
-        imageName = "4" + ".ppm"
-        dir = str(dir_i)
+        imagePathArray = imagePath.split("/")
+        imageName = imagePathArray[-1].split("_")[0] + "_deidentified.ppm"
+        image_orig_name = imagePathArray[-1].split("_")[0] + ".ppm"
+        
+        
         i += 1
         if i >=1:
-            dir_i += 1
             i = 0
-        destination = destinationFolder + "_" + str(numImages) + "/s" + dir
+        destination = destinationFolder + "/deidentification_destination" + "_" + str(numImages) +  "_" + description + "/"
         if not os.path.exists(destination):
             os.makedirs(destination)
-        destination = destination + "/" + imageName
-
+        destination_deident = destination + "/" + imageName
+        destination_orig = destination + "/" + image_orig_name
+        
         templates_positions = loadTemplatesPositions(templates_database)#load positions of template from txt file
         
-        image_positions = loadDatabaseImage_CalculateFacialLandmarks(destination, imagePath, False) #calculate landmarks
+        image_positions = loadDatabaseImage_CalculateFacialLandmarks(destination_deident, imagePath, False) #calculate landmarks
         closest_Index = find_closest_Image(image_positions, templates_positions, k=4) #find k-th closest image index
         closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index] # get closest image path
         print(closest_Image_path)
@@ -281,7 +293,12 @@ def deidentifyImages(database_folder, destinationFolder, templates_database, num
         
         if gray == True:
             replacedImg = cv2.cvtColor(replacedImg, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite(destination,replacedImg)
+            
+        if write_original == True:
+            #load original image
+            original_imagE = cv2.imread(imagePath, cv2.IMREAD_COLOR)
+            cv2.imwrite(destination_orig,original_imagE)
+        cv2.imwrite(destination_deident,replacedImg)
         print("Image " + imagePath + "writen to " + destination)
     print("Finished building gray database")
 if __name__ == "__main__":
@@ -292,16 +309,18 @@ if __name__ == "__main__":
     # 3 - deidentification on more images
     # 4 - store database image to destination
     # 5 - find facial landmarks on template images
-    operation = 1
+    
+    
+    operation = 3
 
 
     if operation == 1:
 
         #findFacialLandmarksOnTemplateImages(templates_database, templates_destination, False, False, True)
         #findFacialLandmarksOnTemplateImages_EyeRegion(templates_database, templates_destination, True, False, False)
-        imagePath = getImagePath(destination,"008")
+        imagePath = getImagePath(man_no_glasses,"008") #image folder,image name
         templates_positions = loadTemplatesPositions(templates_database)
-        image_positions = loadDatabaseImage_CalculateFacialLandmarks(destination, imagePath, False)
+        image_positions = loadDatabaseImage_CalculateFacialLandmarks(man_no_glasses, imagePath, False)
         closest_Index = find_closest_Image(image_positions, templates_positions, 1)
         closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index]
         print(closest_Image_path)
@@ -309,7 +328,7 @@ if __name__ == "__main__":
     elif operation == 2:
         databaseToGrayScale(databaseImages_3, deidentifiedImages, 40,firstImageNum = 2,  lastImageNum = 3, grayScale=True)
     elif operation == 3:
-        deidentifyImages(destination, deidentifiedImages, templates_database, 40, gray=False)
+        deidentifyImages(man_no_glasses, deidentifiedImages, templates_database, 40, description = "man_no_glasses_face", parts = ["Face"], gray=False, write_original = True)
     elif operation == 4:
         storeDatabaseImagesToDestination(XMVTS2_database, databaseImages_3, extension="ppm", ImageNum="3")
     elif operation == 5:
