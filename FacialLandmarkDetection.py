@@ -70,6 +70,22 @@ class FacialLandmarkDetector:
         if normalize==True:
             self.parts = self.normalize(self.parts)
         return self.parts
+        #detects facial landmarks based
+    #returns list of tuples of (x,y) which represent 68 landmark points
+    def detectFacialLandmarks_get_image(self):
+        #shape_predictor_68_face_landmarks.dat can be downloaded from
+        # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
+        self.parts = []
+        predictor_path = "shape_predictor_68_face_landmarks.dat"
+        predictor = dlib.shape_predictor(predictor_path)
+        d = self.detect_frontal_face()
+        self.shape = predictor(self.img, d)
+
+        for i in range(self.shape.num_parts):
+            self.parts.append((self.shape.part(i).x,self.shape.part(i).y))
+            cv2.circle(self.img,(self.shape.part(i).x,self.shape.part(i).y), 2, (0,0,255), -1)
+        return self.img
+
     def getFacialLandmarksOfFacePart(self, faceParts, draw=False):
         if self.shape == None:
             self.parts = self.detectFacialLandmarks(False, normalize=False)

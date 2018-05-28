@@ -6,12 +6,12 @@ from FacialLandmarkDetection import *
 
 
 if __name__ == "__main__":
-    image_name = "/home/matej/Diplomski/baze/baza_XMVTS2/000/000_1_1.ppm"
+    image_name = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/000/000_1_1.ppm"
     detector = FacialLandmarkDetector(image_name)
     #detector.detect_frontal_face(True)
-    detector.showImage()
-    #parts = detector.detectFacialLandmarks(True)
     #detector.showImage()
+    parts = detector.detectFacialLandmarks(draw=True, normalize=False)
+    detector.showImage()
     #print(parts)
     #foundParts = detector.getFacialLandmarksOfFacePart(["Nose", "Mouth"], True)
     #detector.showImage()

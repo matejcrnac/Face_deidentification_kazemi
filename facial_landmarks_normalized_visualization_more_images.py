@@ -10,6 +10,34 @@ import numpy as np
 from FacialLandmarkDetection import *
 from Database_loader import *
 
+#Method is used to get paths for template images
+def getTemplatePaths(templates_folder, extension):
+    fileNames = []
+    for root, dirs, files in os.walk(templates_folder):
+        for file in files:
+            if file.endswith(extension):
+                fName = os.path.join(root, file)
+                fileNames.append(fName)
+    fileNames = sorted(fileNames)
+    return fileNames
+    
+def unnormalized_facial_landmarks_detect(imagePath):
+    detector = FacialLandmarkDetector(imagePath)
+    image_original = detector.getImage()
+    shape = image_original.shape
+    #get normalized landmarks on black background
+    image_landmarks_norm = detector.detectFacialLandmarks(draw=False, normalize=True)
+    
+    image_orig_black_white_norm = np.zeros((int(shape[0]/3), int(shape[1]/3)), dtype=np.float64)
+    
+    max_shape = np.max(shape)
+    for position in image_landmarks_norm:
+        x = ((position[0] * (max_shape/8))+max_shape/8).astype(np.int32)
+        y = ((position[1] * (max_shape/8))+max_shape/8).astype(np.int32)
+        
+        cv2.circle(image_orig_black_white_norm,(x,y), 1, (1,1,1), -1)
+    return image_orig_black_white_norm
+
 
 #shows image inside a windows
 def showImage_more(img,text,  gray=False):
@@ -39,39 +67,13 @@ if __name__ == "__main__":
     
     
     destination_deident = ""
-            
-    #show original image
-    detector = FacialLandmarkDetector(imagePath)
     
-    #get landmarks drawn on image
-    image_original = detector.detectFacialLandmarks_get_image()
-    showImage_more(img=image_original, text="original", gray=False)
-    
-    #get landmarks on black background
-    image_landmarks = detector.detectFacialLandmarks(draw=False, normalize=False)
-    
-    image_orig_black_white = np.zeros((image_original.shape[0], image_original.shape[1]), dtype=np.float64)
-    
-    for position in image_landmarks:
-        cv2.circle(image_orig_black_white,(position[0],position[1]), 3, (1,1,1), -1)
-    
-    showImage_more(img=image_orig_black_white, text="black_white", gray=False)
-    
-    #get normalized landmarks on black background
-    image_landmarks_norm = detector.detectFacialLandmarks(draw=False, normalize=True)
-    
-    image_orig_black_white_norm = np.zeros((image_original.shape[0], image_original.shape[1]), dtype=np.float64)
-    
-    
-    for position in image_landmarks_norm:
-        x = ((position[0] * (image_original.shape[0]/4))+image_original.shape[0]/4).astype(np.int32)
-        y = ((position[1] * (image_original.shape[0]/4))+image_original.shape[0]/4).astype(np.int32)
-        
-        cv2.circle(image_orig_black_white_norm,(x,y), 3, (1,1,1), -1)
-    
-    showImage_more(img=image_orig_black_white_norm, text="black_white_norm", gray=False)
 
+    template_paths = getTemplatePaths(templates_database, extension="ppm")
     
-    #show template images
-    
+    k_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    for k in k_list:
+        image_orig_black_white_norm = unnormalized_facial_landmarks_detect(imagePath = template_paths[k-1])
+        showImage_more(img=image_orig_black_white_norm, text=str(k) + "- image", gray=False)
     cv2.waitKey(0)
+    

@@ -60,7 +60,7 @@ def find_closest_Image_sorted_list(image_positions, templatePositions, k=1):
     distances = collections.OrderedDict(sorted(distances.items()))
     index_sorted_list = []
     for key, value in distances.items():
-        index_sorted_list.append(value)
+        index_sorted_list.append((value, key))
 
     return index_sorted_list
 #shows image inside a windows
@@ -110,13 +110,14 @@ if __name__ == "__main__":
     
     template_paths = getTemplatePaths(templates_database, extension="ppm")
     
-    print(template_paths[sorted_closest_indexes[0]])
+    print(template_paths[sorted_closest_indexes[0][0]])
     k_list = [1, 2, 3, 4, 5, 20]
     for k in k_list:
-        index = sorted_closest_indexes[k-1]
+        index = sorted_closest_indexes[k-1][0]
+        distance_val = sorted_closest_indexes[k-1][1]
         template_path = template_paths[index]
         detector = FacialLandmarkDetector(template_path)
         img = detector.detectFacialLandmarks_get_image()
         
-        showImage_more(img=img, text=str(k), gray=False)
+        showImage_more(img=img, text=str(k) + "-" + str(distance_val), gray=False)
     cv2.waitKey(0)

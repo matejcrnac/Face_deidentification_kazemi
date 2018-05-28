@@ -68,14 +68,14 @@ ALIGN_POINTS = (LEFT_BROW_POINTS + RIGHT_EYE_POINTS + LEFT_EYE_POINTS +
 
 # Points from the second image to overlay on the first. The convex hull of each
 # element will be overlaid.
-#OVERLAY_POINTS = [
-#    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS,
-#    NOSE_POINTS + MOUTH_POINTS,
-#]
-
 OVERLAY_POINTS = [
-    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS + NOSE_POINTS,
+    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS,
+    NOSE_POINTS + MOUTH_POINTS,
 ]
+
+#OVERLAY_POINTS = [
+#    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS + NOSE_POINTS,
+#]
 
 #OVERLAY_POINTS = [
 #    NOSE_POINTS + MOUTH_POINTS,
@@ -141,7 +141,10 @@ def transformation_from_points(points1, points2):
         sum ||s*R*p1,i + T - p2,i||^2
 
     is minimized.
-
+    s - scaling
+    R - rotation matrix
+    T - translation vectors
+    p and q are landmark points of image 1 and image 2  
     """
     # Solve the procrustes problem by subtracting centroids, scaling by the
     # standard deviation, and then using the SVD to calculate the rotation. See
@@ -151,16 +154,19 @@ def transformation_from_points(points1, points2):
     points1 = points1.astype(numpy.float64)
     points2 = points2.astype(numpy.float64)
 
+    #subtract mean
     c1 = numpy.mean(points1, axis=0)
     c2 = numpy.mean(points2, axis=0)
     points1 -= c1
     points2 -= c2
 
+    #divide by standard deviation
     s1 = numpy.std(points1)
     s2 = numpy.std(points2)
     points1 /= s1
     points2 /= s2
 
+    #Use SVD (Singular Value Decomposition) to calculate rotation
     U, S, Vt = numpy.linalg.svd(points1.T * points2)
 
     # The R we seek is in fact the transpose of the one given by U * Vt. This
