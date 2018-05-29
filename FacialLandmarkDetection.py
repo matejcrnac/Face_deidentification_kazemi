@@ -30,8 +30,8 @@ class FacialLandmarkDetector:
         cv2.waitKey(0)
     def getImage(self):
         return self.img
-    def saveImage(self, destination):
-        imgName = self.image_path.split("/")[-1]
+    def saveImage(self, destination, additional_name = ""):
+        imgName = self.image_path.split("/")[-1] + additional_name
         cv2.imwrite(destination+"/"+imgName,self.img)
     def normalize(self, parts):
         mean = (sum([value[0] for value in parts]) / float(len(parts)), sum([value[1] for value in parts]) / float(len(parts)))
@@ -51,10 +51,76 @@ class FacialLandmarkDetector:
             #think about normalizes by variance
             normalized.append(tuple(numpy.divide(point, maxValue)))
         return normalized
+        
+    #Method calculates affine transformation matrix M
+    def transformation_from_points(self, points1, points2):
+        """
+        Return an affine transformation [s * R | T] such that:
+
+            sum ||s*R*p1,i + T - p2,i||^2
+
+        is minimized.
+        s - scaling
+        R - rotation matrix
+        T - translation vectors
+        p and q are landmark points of image 1 and image 2  
+        """
+        # Solve the procrustes problem by subtracting centroids, scaling by the
+        # standard deviation, and then using the SVD to calculate the rotation. See
+        # the following for more details:
+        #   https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem
+
+        points1 = points1.astype(numpy.float64)
+        points2 = points2.astype(numpy.float64)
+
+        #subtract mean
+        c1 = numpy.mean(points1, axis=0)
+        c2 = numpy.mean(points2, axis=0)
+        points1 -= c1
+        points2 -= c2
+
+        #divide by standard deviation
+        s1 = numpy.std(points1)
+        s2 = numpy.std(points2)
+        points1 /= s1
+        points2 /= s2
+
+        #Use SVD (Singular Value Decomposition) to calculate rotation
+        U, S, Vt = numpy.linalg.svd(points1.T * points2)
+
+        # The R we seek is in fact the transpose of the one given by U * Vt. This
+        # is because the above formulation assumes the matrix goes on the right
+        # (with row vectors) where as our solution requires the matrix to be on the
+        # left (with column vectors).
+        R = (U * Vt).T
+
+        return numpy.vstack([numpy.hstack(((s2 / s1) * R,
+                                           c2.T - (s2 / s1) * R * c1.T)),
+                             numpy.matrix([0., 0., 1.])])
+                             
+    #Method uses affine transformation on image
+    def warp_im(self, im, M, dshape):
+        output_im = numpy.zeros(dshape, dtype=im.dtype)
+        cv2.warpAffine(im,
+                       M[:2],
+                       (dshape[1], dshape[0]),
+                       dst=output_im,
+                       borderMode=cv2.BORDER_TRANSPARENT,
+                       flags=cv2.WARP_INVERSE_MAP)
+        return output_im
+        
+    #Method is used to warp current image based on given positions
+    def warpe_image(self, base_positions):
+        image_landmark_positions = self.detectFacialLandmarks(draw=False, normalize=False, numpy_format = True)
+        #image_landmark_positions = numpy.matrix([[p[0], p[1]] for p in image_landmark_positions])
+        
+        M = self.transformation_from_points(base_positions,image_landmark_positions)
+        self.img = self.warp_im(self.img, M, self.img.shape)
+        
 
     #detects facial landmarks based
     #returns list of tuples of (x,y) which represent 68 landmark points
-    def detectFacialLandmarks(self, draw, normalize=True):
+    def detectFacialLandmarks(self, draw, normalize=True, numpy_format = False):
         #shape_predictor_68_face_landmarks.dat can be downloaded from
         # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
         self.parts = []
@@ -69,7 +135,10 @@ class FacialLandmarkDetector:
                 cv2.circle(self.img,(self.shape.part(i).x,self.shape.part(i).y), 2, (0,0,255), -1)
         if normalize==True:
             self.parts = self.normalize(self.parts)
-        return self.parts
+        if numpy_format == False:
+            return self.parts
+        return numpy.matrix([[p[0], p[1]] for p in self.parts])
+        
         #detects facial landmarks based
     #returns list of tuples of (x,y) which represent 68 landmark points
     def detectFacialLandmarks_get_image(self):

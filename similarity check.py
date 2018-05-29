@@ -22,17 +22,24 @@ def getTemplatePaths(templates_folder, extension):
 def loadTemplatesPositions(templates_folder):
     positions = []
     fileNames = getTemplatePaths(templates_folder, "txt")
+    base = []
     for fileName in fileNames:
         position = []
         f = open(fileName,"r")
         line = f.readline()
         tempPos = line.split(" ")
+        if "base" in fileName:
+            print("Found base")
+            for i in range(0, len(tempPos[:-1]), 2):
+                base.append((int(tempPos[i]), int(tempPos[i+1])))
+            continue
+            
         for i in range(0, len(tempPos), 2):
             position.append((float(tempPos[i]), float(tempPos[i+1])))
         positions.append(position)
         f.close()
 
-    return positions
+    return (base, positions)
 #Method load image from database, and calculates facial landmarks for given image, and shows image if parameter is set to True
 def loadDatabaseImage_CalculateFacialLandmarks(database_folder, imagePath, showImages=False):
     #loader = DatabaseLoaderXMVTS2(database_folder)
@@ -92,9 +99,15 @@ if __name__ == "__main__":
     
     destination_deident = ""
     
-    templates_positions = loadTemplatesPositions(templates_database)#load positions of template from txt file
+    (base, templates_positions) = loadTemplatesPositions(templates_database)#load positions of template from txt file
     
-    image_positions = loadDatabaseImage_CalculateFacialLandmarks(destination_deident, imagePath, False) #calculate landmarks
+    base_position = numpy.matrix([[p[0], p[1]] for p in base])
+    
+    detector = FacialLandmarkDetector(imagePath)
+    detector.warpe_image(base_positions = base_position)
+    
+    image_positions = detector.detectFacialLandmarks(draw=False, normalize = True, numpy_format = False)
+    
     sorted_closest_indexes = find_closest_Image_sorted_list(image_positions, templates_positions, k=4) #find k-th closest image index
     
     print("Sorted template indexes based on distance from image")
@@ -111,7 +124,7 @@ if __name__ == "__main__":
     template_paths = getTemplatePaths(templates_database, extension="ppm")
     
     print(template_paths[sorted_closest_indexes[0][0]])
-    k_list = [1, 2, 3, 4, 5, 20]
+    k_list = [1, 2, 3,10, 15]
     for k in k_list:
         index = sorted_closest_indexes[k-1][0]
         distance_val = sorted_closest_indexes[k-1][1]

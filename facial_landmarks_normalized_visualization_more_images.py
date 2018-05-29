@@ -65,9 +65,7 @@ if __name__ == "__main__":
     
     imagePath = image_path_man_glasses  #chose image to use!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
-    
-    destination_deident = ""
-    
+        
 
     template_paths = getTemplatePaths(templates_database, extension="ppm")
     
