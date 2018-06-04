@@ -6,7 +6,7 @@ from FacialLandmarkDetection import *
 
 
 if __name__ == "__main__":
-    image_name = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/000/000_1_1.ppm"
+    image_name = "/media/matej/D/Databases/baze/helen-master/helen-master/data/img/106242334_1.jpg"
     detector = FacialLandmarkDetector(image_name)
     #detector.detect_frontal_face(True)
     #detector.showImage()

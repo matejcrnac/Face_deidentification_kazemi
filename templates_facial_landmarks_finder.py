@@ -92,7 +92,7 @@ def getImagePath(database_folder, imageName):
 if __name__ == "__main__":
 
     templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
-
+    templates_similarity_test = "/home/matej/Diplomski/baze/Templates/templates_similarity_test"
 
     templates_destination = "/home/matej/Diplomski/baze/Templates/KazemiTemplates"
 

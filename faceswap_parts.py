@@ -51,7 +51,8 @@ import sys
 
 PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"
 SCALE_FACTOR = 1 
-FEATHER_AMOUNT = 11
+FEATHER_AMOUNT = 9
+
 
 FACE_POINTS = list(range(17, 68))
 MOUTH_POINTS = list(range(48, 61))
@@ -61,24 +62,26 @@ RIGHT_EYE_POINTS = list(range(36, 42))
 LEFT_EYE_POINTS = list(range(42, 48))
 NOSE_POINTS = list(range(27, 35))
 JAW_POINTS = list(range(0, 17))
+RIGHT_UPPER_JAW = list(range(2, 3))
+LEFT_UPPER_JAW = list(range(14, 15))
 
 # Points used to line up the images.
 ALIGN_POINTS = (LEFT_BROW_POINTS + RIGHT_EYE_POINTS + LEFT_EYE_POINTS +
-                               RIGHT_BROW_POINTS + NOSE_POINTS + MOUTH_POINTS)
+                               RIGHT_BROW_POINTS + NOSE_POINTS + MOUTH_POINTS )
 
 # Points from the second image to overlay on the first. The convex hull of each
 # element will be overlaid.
 
 #2 groups - eye region, nose + mouth
-#OVERLAY_POINTS = [
-#    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS,
-#    NOSE_POINTS + MOUTH_POINTS,
-#]
+OVERLAY_POINTS = [
+    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS, 
+    NOSE_POINTS +  MOUTH_POINTS,
+]
 
 #everithing one group
-OVERLAY_POINTS = [
-    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS + NOSE_POINTS + MOUTH_POINTS,
-]
+#OVERLAY_POINTS = [
+#    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS + NOSE_POINTS + MOUTH_POINTS,
+#]
 
 #OVERLAY_POINTS = [
 #    NOSE_POINTS + MOUTH_POINTS,
@@ -222,10 +225,13 @@ image_path_man_glasses = "/home/matej/Diplomski/baze/deidentification_database/D
 image_path_woman_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_no_glasses/154_1_1.ppm"
 image_path_woman_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_glasses/250_1_1.ppm"
 
-image1_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/224/224_1_1.ppm"
+#image1_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/000/000_1_1.ppm"
+image1_helen = "/media/matej/D/Databases/baze/helen-master/helen-master/data/img/100040721_2.jpg"
+image2_helen = "/media/matej/D/Databases/baze/helen-master/helen-master/data/img/206273130_1.jpg"
+image1_path = image1_helen
 #image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/020/020_1_1.ppm"
-image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/114/114_1_1.ppm"
-#image2_path = image_path_man_no_glasses
+#image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/001/001_1_1.ppm"
+image2_path = image2_helen
 
 im1, landmarks1 = read_im_and_landmarks(image1_path)
 im2, landmarks2 = read_im_and_landmarks(image2_path)

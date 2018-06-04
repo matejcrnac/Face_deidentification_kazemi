@@ -1,4 +1,3 @@
-import dlib
 import cv2
 import numpy
 import collections
@@ -6,6 +5,10 @@ import collections
 from FacialLandmarkDetection import *
 from Database_loader import *
 
+SPECIFIC_DISTANCES = [[36, 39], [42, 45], [17, 36], [26, 45], [21, 39], [22, 42], [17, 21], [22, 26], [33, 39], [33, 42], 
+                        [39, 42], [36, 45], [49, 55], [48, 54], [0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10], 
+                        [7, 9], [57, 8], [50, 61], [51, 62], [52, 63], [56, 65], [57, 66], [58, 67], [32, 50], [34, 52], 
+                        [3, 46], [54, 13]]
 
 #Method is used to get paths for template images
 def getTemplatePaths(templates_folder, extension):
@@ -49,20 +52,56 @@ def loadDatabaseImage_CalculateFacialLandmarks(database_folder, imagePath, showI
         detector.showImage()
     return positions
 
+def calculate_face_difference(image1, image2):
+    image1 = numpy.matrix([[p[0], p[1]] for p in image1])
+    image2 = numpy.matrix([[p[0], p[1]] for p in image2])
+    
+    N = len(image1)
+    return numpy.sum(numpy.power(numpy.subtract(image1, image2),2))/N
+    
+def calculate_face_difference_all_distances(image1, image2):
+    image1 = numpy.matrix([[p[0], p[1]] for p in image1])
+    image2 = numpy.matrix([[p[0], p[1]] for p in image2])
+    
+    
+    N = len(image1)
+    iter = 0
+    sum = 0
+    for i in range(N-1):
+        for j in range(i+1, N):
+            iter += 1
+            sum += numpy.sum(numpy.power((image1[i] - image1[j]) - (image2[i] - image2[j]), 2))
+            
+    return sum/iter
+    
+def calculate_face_difference_specific_distances(image1, image2):
+    image1 = numpy.matrix([[p[0], p[1]] for p in image1])
+    image2 = numpy.matrix([[p[0], p[1]] for p in image2])
+    
+    iter = 0
+    sum = 0
+    for pair in SPECIFIC_DISTANCES:
+        iter += 1
+        sum += numpy.sum(numpy.power((image1[pair[0]] - image1[pair[1]]) - (image2[pair[0]] - image2[pair[1]]), 2))
+            
+    return sum/iter
+
+
 #Method is used to find closes template image from given image based on positions
 #k - parameter which determines whichi image will be retured. if k=1, closes, if k=4, 4th closest
 def find_closest_Image_sorted_list(image_positions, templatePositions, k=1):
-    closest = -1
     minScore = 1111111111111111
     distances = {}
-    N = len(image_positions)
+    #N = len(image_positions)
     i=0
     for template in templatePositions:
-        difference = sum(sum(numpy.subtract(image_positions, template)**2)/N)
+        
+        #difference = calculate_face_difference(image_positions, template)
+        #difference = calculate_face_difference_all_distances(image_positions, template)
+        difference = calculate_face_difference_specific_distances(image_positions, template)
         distances[difference] = i
         if difference < minScore:
             minScore = difference
-            closest = i
         i += 1
     distances = collections.OrderedDict(sorted(distances.items()))
     index_sorted_list = []
@@ -82,19 +121,28 @@ def showImage_more(img,text,  gray=False):
 
 if __name__ == "__main__":
     
-    templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
+    templates_database_orig = "/home/matej/Diplomski/baze/Templates/baza_templates"
+    templates_similarity_test = "/home/matej/Diplomski/baze/Templates/templates_similarity_test"
+    templates_database = templates_similarity_test
+    
+    
     imagePath_same1 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/000/000_1_1.ppm"
-    imagePath_same2 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/003/003_1_1.ppm"
-    imagePath_same3 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/004/004_1_1.ppm"
-    imagePath_same4 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/041/041_1_1.ppm"
-    imagePath_same5 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/134/134_1_1.ppm"
+    imagePath_same2 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/001/001_1_1.ppm"
+    imagePath_same3 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/002/002_1_1.ppm"
+    imagePath_same4 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/004/004_1_1.ppm"
+    imagePath_same5 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/005/005_1_1.ppm"
+    imagePath_same6 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/006/006_1_1.ppm"
+    imagePath_same7 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/007/007_1_1.ppm"
+    imagePath_same8 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/008/008_1_1.ppm"
+    imagePath_same9 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/009/009_1_1.ppm"
+    imagePath_same10 = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/010/010_1_1.ppm"
     
     image_path_man_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/man_no_glasses/143_1_1.ppm"
     image_path_man_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/man_glasses/113_1_1.ppm"
     image_path_woman_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_no_glasses/154_1_1.ppm"
     image_path_woman_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_glasses/250_1_1.ppm"
     
-    imagePath = image_path_man_no_glasses  #chose image to use!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    imagePath = imagePath_same7  #chose image to use!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
     
     destination_deident = ""
@@ -124,7 +172,7 @@ if __name__ == "__main__":
     template_paths = getTemplatePaths(templates_database, extension="ppm")
     
     print(template_paths[sorted_closest_indexes[0][0]])
-    k_list = [1, 2, 3,10, 15]
+    k_list = [1, 2, 3,4, 5, 6, 7, 8, 9]
     for k in k_list:
         index = sorted_closest_indexes[k-1][0]
         distance_val = sorted_closest_indexes[k-1][1]
