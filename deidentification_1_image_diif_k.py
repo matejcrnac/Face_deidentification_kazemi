@@ -2,6 +2,7 @@ from FacialLandmarkDetection import *
 from Database_loader import *
 import collections
 from FaceSwaper import *
+import numpy as np
 
 #This program has 5 operations. Chose operation int the bottom. Description of each operation is given in the bottom.
 
@@ -241,7 +242,7 @@ woman_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentifi
 
 
 XMVTS2_database = "/home/matej/Diplomski/baze/baza_XMVTS2"
-destination = "/home/matej/Diplomski/baze/baza_deidentification_Images"
+destination = "/home/matej/Diplomski/baze/deidentification_destination"
 templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
 
 
@@ -261,7 +262,7 @@ SPECIFIC_DISTANCES = [[36, 39], [42, 45], [17, 36], [26, 45], [21, 39], [22, 42]
 
 if __name__ == "__main__":
 
-    imagePath = getImagePath(man_no_glasses,"011") #image folder,image name
+    imagePath = getImagePath(man_no_glasses,"001") #image folder,image name
     
     (base, templates_positions) = loadTemplatesPositions(templates_database)#load positions of template from txt file
     if len(templates_positions) == 0:
@@ -275,32 +276,45 @@ if __name__ == "__main__":
     image_positions_non_norm = detector.detectFacialLandmarks(draw=False, normalize = True, numpy_format = False)
     image_positions = detector.normalize(image_positions_non_norm)
     
-    #method = "landmarks_diff"
+    method = "landmarks_diff"
     #method = "landmarks_distances_all"
     #method = "landmar_distances_spec"
-    sorted_closest_indexes = find_closest_Image_sorted_list(image_positions, templates_positions,method = "landmarks_diff",  k=4) #find k-th closest image index
+    sorted_closest_indexes = find_closest_Image_sorted_list(image_positions, templates_positions,method = method,  k=4) #find k-th closest image index
 
-    k = 1
+    imageName = imagePath.split("/")[-1].split("_")[0]
     
-    closest_Index = sorted_closest_indexes[k-1][0]
-    
-    closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index]
-    print(closest_Image_path)
-    
-    faceswaper = FaceSwap(imagePath, closest_Image_path)
-    image = faceswaper.swap_face()
-    
-    
-    #replaceEyeRegionOfImageWithTemplate(imagePath, closest_Image_path, parts = ["EyeRegion", "Nose", "Mouth"])
-    img_orig = cv2.imread(imagePath, cv2.IMREAD_COLOR)
-    showImage_more(img=img_orig, text="original", gray=False)
-    img_orig2 = cv2.imread(closest_Image_path, cv2.IMREAD_COLOR)
-    showImage_more(img=img_orig2, text="original2", gray=False)
-    
-    showImage_more(img=image/255., text="k = " + str(k), gray=False)
-    cv2.waitKey(0)
-    #cv2.imshow("deidentified", image/255.)
-    #cv2.waitKey(0)
+    destination = destination + "/deidentification_destination" + method  +"_"+ imageName + "/"
+    if not os.path.exists(destination):
+        os.makedirs(destination)
+        
+    for k in range(1, 21):
+        
+        closest_Index = sorted_closest_indexes[k-1][0]
+        
+        closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index]
+        
+        faceswaper = FaceSwap(imagePath, closest_Image_path)
+        image = faceswaper.swap_face()
+        
+         
+        img_orig = cv2.imread(imagePath, cv2.IMREAD_COLOR)
+        cv2.putText(img_orig,"original" , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
+        
+        img_orig2 = cv2.imread(closest_Image_path, cv2.IMREAD_COLOR)
+        cv2.putText(img_orig2,"original2" , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(image,"k="+str(k) , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
+        
+        out = np.concatenate((img_orig, image), axis=1)
+
+        out = np.concatenate((out, img_orig2), axis=1)
+        
+        imname = destination + imageName + "k_" + str(k+1) + ".ppm"
+        cv2.imwrite(imname, out)
+        print("Finished image" + str(k))
+        #cv2.imshow("deidentified", image/255.)
+                    
+        
+        #cv2.waitKey(0)
 
 
 

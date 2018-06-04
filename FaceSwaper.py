@@ -1,8 +1,6 @@
 import cv2
-import dlib
 import numpy
 
-import sys
 from FacialLandmarkDetection import *
 
 
