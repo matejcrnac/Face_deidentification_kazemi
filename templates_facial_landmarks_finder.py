@@ -13,10 +13,13 @@ woman_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentifi
 
 XMVTS2_database = "/home/matej/Diplomski/baze/baza_XMVTS2"
 destination = "/home/matej/Diplomski/baze/baza_deidentification_Images"
+
+
 templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
-
-
 templates_destination = "/home/matej/Diplomski/baze/Templates/KazemiTemplates"
+
+templates_man_no_glasses = "/home/matej/Diplomski/baze/Templates/man_no_glasses"
+templates_man_no_glasses_destination = "/home/matej/Diplomski/baze/Templates/man_no_glasses_Kazemi"
 
 XMVTS2_gray_faceReq = "/home/matej/Diplomski/baze/baza_XMVTS2_gray_facereq"
 
@@ -91,11 +94,11 @@ def getImagePath(database_folder, imageName):
 
 if __name__ == "__main__":
 
-    templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
-    templates_similarity_test = "/home/matej/Diplomski/baze/Templates/templates_similarity_test"
+    #templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
+    #templates_similarity_test = "/home/matej/Diplomski/baze/Templates/templates_similarity_test"
 
-    templates_destination = "/home/matej/Diplomski/baze/Templates/KazemiTemplates"
+    #templates_destination = "/home/matej/Diplomski/baze/Templates/KazemiTemplates"
 
-    findFacialLandmarksOnTemplateImages(templates_database, templates_destination, warp = True, showImages = False, store=True, storePositions = True)
+    findFacialLandmarksOnTemplateImages(templates_man_no_glasses, templates_man_no_glasses_destination, warp = True, showImages = False, store=True, storePositions = True)
 
 

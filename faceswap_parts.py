@@ -228,10 +228,10 @@ image_path_woman_glasses = "/home/matej/Diplomski/baze/deidentification_database
 #image1_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/000/000_1_1.ppm"
 image1_helen = "/media/matej/D/Databases/baze/helen-master/helen-master/data/img/100040721_2.jpg"
 image2_helen = "/media/matej/D/Databases/baze/helen-master/helen-master/data/img/206273130_1.jpg"
-image1_path = image1_helen
+image1_path = image_path_man_no_glasses
 #image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/020/020_1_1.ppm"
-#image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/001/001_1_1.ppm"
-image2_path = image2_helen
+image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/001/001_1_1.ppm"
+image2_path = image2_path
 
 im1, landmarks1 = read_im_and_landmarks(image1_path)
 im2, landmarks2 = read_im_and_landmarks(image2_path)

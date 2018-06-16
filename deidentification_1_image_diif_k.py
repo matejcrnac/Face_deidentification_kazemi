@@ -245,6 +245,9 @@ XMVTS2_database = "/home/matej/Diplomski/baze/baza_XMVTS2"
 destination = "/home/matej/Diplomski/baze/deidentification_destination"
 templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
 
+templates_man_no_glasses = "/home/matej/Diplomski/baze/Templates/man_no_glasses"
+templates_man_no_glasses_destination = "/home/matej/Diplomski/baze/Templates/man_no_glasses_Kazemi"
+
 
 templates_destination = "/home/matej/Diplomski/baze/KazemiTemplates"
 
@@ -262,9 +265,9 @@ SPECIFIC_DISTANCES = [[36, 39], [42, 45], [17, 36], [26, 45], [21, 39], [22, 42]
 
 if __name__ == "__main__":
 
-    imagePath = getImagePath(man_no_glasses,"001") #image folder,image name
+    imagePath = getImagePath(man_glasses,"013") #image folder,image name
     
-    (base, templates_positions) = loadTemplatesPositions(templates_database)#load positions of template from txt file
+    (base, templates_positions) = loadTemplatesPositions(templates_man_no_glasses)#load positions of template from txt file
     if len(templates_positions) == 0:
         print("No loaded templates!!")
         exit()
@@ -283,15 +286,17 @@ if __name__ == "__main__":
 
     imageName = imagePath.split("/")[-1].split("_")[0]
     
-    destination = destination + "/deidentification_destination" + method  +"_"+ imageName + "/"
+    destination = destination + "/deidentification_destination_man_glasses_2_no_glasses_" + method  +"_"+ imageName + "/"
     if not os.path.exists(destination):
         os.makedirs(destination)
-        
-    for k in range(1, 21):
+    
+    templates_number = len(sorted_closest_indexes)
+    
+    for k in range(1, templates_number+1):
         
         closest_Index = sorted_closest_indexes[k-1][0]
         
-        closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index]
+        closest_Image_path = getTemplatePaths(templates_man_no_glasses, "ppm")[closest_Index]
         
         faceswaper = FaceSwap(imagePath, closest_Image_path)
         image = faceswaper.swap_face()
