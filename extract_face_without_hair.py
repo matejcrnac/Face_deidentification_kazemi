@@ -30,8 +30,6 @@ data_folder_deidentification = "/media/matej/D/Diplomski/baza/rezultati/deidenti
 if __name__ == "__main__":
     image_name = "/media/matej/D/Diplomski/baza/rezultati/deidentification_destination_all_images_all_k_no_comparing_landmar_distances_spec/001/001_k_5.ppm"
     detector = FacialLandmarkDetector(image_name)
-    #detector.detect_frontal_face(True)
-    #detector.showImage()
     image = detector.getImage()
 
     parts = detector.detectFacialLandmarks(draw = False, normalize=False, numpy_format = True)
@@ -41,20 +39,11 @@ if __name__ == "__main__":
     parts = numpy.vstack([parts, [(int)((max_x+min_x)/2), min_y-10]])
     parts = numpy.vstack([parts, [(int)(((max_x+min_x)/2 + min_x)/2), min_y-10]])
     parts = numpy.vstack([parts, [(int)(((max_x+min_x)/2 + max_x)/2), min_y-10]])
-    #parts = numpy.vstack([parts, [(int)((max_x+min_x)/2 + (max_x+min_x)/4), min_y-10]])
-    #parts = numpy.vstack([parts, [(int)((max_x+min_x)/2 + (max_x+min_x)/3), min_y-10]])
     
     mask = get_face_mask(image, parts)
     
     image = (image * mask).astype(numpy.uint8)
-    #cv2.imshow("bez", image)
-    #cv2.waitKey(0)
     image = image[min_y - 20:max_y + 10, min_x - 10:max_x + 10]
     cv2.imshow("bez", image)
     cv2.waitKey(0)
-    #print(parts)
-    #foundParts = detector.getFacialLandmarksOfFacePart(["Nose", "Mouth"], True)
-    #detector.showImage()
-    #print(foundParts)
-    #ROI = detector.extractFacePart("EyeRegion")
-    #cv2.imshow('image',ROI)
+    cv2.destroyAllWindows()

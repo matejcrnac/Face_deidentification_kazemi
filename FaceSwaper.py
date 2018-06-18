@@ -131,7 +131,7 @@ class FaceSwap:
     def correct_colours(self, im1, im2, landmarks1):
         blur_amount = COLOUR_CORRECT_BLUR_FRAC * numpy.linalg.norm(
                                   numpy.mean(landmarks1[LEFT_EYE_POINTS], axis=0) -
-                                  numpy.mean(landmarks1[RIGHT_EYE_POINTS], axis=0))
+                                  nFEATHER_AMOUNTumpy.mean(landmarks1[RIGHT_EYE_POINTS], axis=0))
         blur_amount = int(blur_amount)
         if blur_amount % 2 == 0:
             blur_amount += 1

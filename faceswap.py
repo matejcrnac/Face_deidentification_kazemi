@@ -51,7 +51,7 @@ import sys
 
 PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"
 SCALE_FACTOR = 1 
-FEATHER_AMOUNT = 11
+FEATHER_AMOUNT = 9
 
 FACE_POINTS = list(range(17, 68))
 MOUTH_POINTS = list(range(48, 61))
@@ -69,8 +69,7 @@ ALIGN_POINTS = (LEFT_BROW_POINTS + RIGHT_EYE_POINTS + LEFT_EYE_POINTS +
 # Points from the second image to overlay on the first. The convex hull of each
 # element will be overlaid.
 OVERLAY_POINTS = [
-    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS,
-    NOSE_POINTS + MOUTH_POINTS,
+    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS + NOSE_POINTS +  MOUTH_POINTS,
 ]
 
 #OVERLAY_POINTS = [
@@ -245,4 +244,4 @@ cv2.imshow("original2", im2)
 cv2.imshow("image", output_im/255.)
 cv2.waitKey(0)
 #cv2.imwrite('output1.jpg', output_im)
-
+cv2.destroyAllWindows()

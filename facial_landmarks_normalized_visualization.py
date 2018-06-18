@@ -75,3 +75,4 @@ if __name__ == "__main__":
     #show template images
     
     cv2.waitKey(0)
+    cv2.destroyAllWindows()

@@ -288,7 +288,7 @@ if __name__ == "__main__":
     #method = "landmarks_distances_all"
     method = "landmar_distances_spec"
 
-    destination = destination + "/deidentification_destination_all_images_all_k_no_comparing_" + method + "/"
+    destination = destination + "/deidentification_destination_all_images_all_k_no_comparing_better_spec_" + method + "/"
     if not os.path.exists(destination):
         os.makedirs(destination)
 

@@ -307,3 +307,4 @@ if __name__ == "__main__":
     #ROI = detector.extractFacePart("EyeRegion")
     #cv2.imshow('image',ROI)
     cv2.waitKey(0)
+    cv2.destroyAllWindows()

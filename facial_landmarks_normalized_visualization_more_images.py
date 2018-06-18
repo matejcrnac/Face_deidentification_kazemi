@@ -74,4 +74,5 @@ if __name__ == "__main__":
         image_orig_black_white_norm = unnormalized_facial_landmarks_detect(imagePath = template_paths[k-1])
         showImage_more(img=image_orig_black_white_norm, text=str(k) + "- image", gray=False)
     cv2.waitKey(0)
+    cv2.destroyAllWindows()
     

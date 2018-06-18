@@ -46,7 +46,6 @@ from `<head image>` replaced with the facial features from `<face image>`.
 import cv2
 import dlib
 import numpy
-
 import sys
 
 PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"
@@ -74,8 +73,7 @@ ALIGN_POINTS = (LEFT_BROW_POINTS + RIGHT_EYE_POINTS + LEFT_EYE_POINTS +
 
 #2 groups - eye region, nose + mouth
 OVERLAY_POINTS = [
-    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS, 
-    NOSE_POINTS +  MOUTH_POINTS,
+    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS + NOSE_POINTS +  MOUTH_POINTS,
 ]
 
 #everithing one group
@@ -228,10 +226,10 @@ image_path_woman_glasses = "/home/matej/Diplomski/baze/deidentification_database
 #image1_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/000/000_1_1.ppm"
 image1_helen = "/media/matej/D/Databases/baze/helen-master/helen-master/data/img/100040721_2.jpg"
 image2_helen = "/media/matej/D/Databases/baze/helen-master/helen-master/data/img/206273130_1.jpg"
-image1_path = image_path_man_no_glasses
+image1_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/003/003_1_1.ppm"
 #image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/020/020_1_1.ppm"
 image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/001/001_1_1.ppm"
-image2_path = image2_path
+image2_path = "/home/matej/Diplomski/baze/baze_original/baza_XMVTS2/016/016_1_1.ppm"
 
 im1, landmarks1 = read_im_and_landmarks(image1_path)
 im2, landmarks2 = read_im_and_landmarks(image2_path)
@@ -240,21 +238,21 @@ M = transformation_from_points(landmarks1[ALIGN_POINTS],
                                landmarks2[ALIGN_POINTS])
 
 mask = get_face_mask(im2, landmarks2)
-cv2.imshow("mask", mask)
+#cv2.imshow("mask", mask)
 
 warped_mask = warp_im(mask, M, im1.shape)
-cv2.imshow("warped mask", warped_mask)
+#cv2.imshow("warped mask", warped_mask)
 
 combined_mask = numpy.max([get_face_mask(im1, landmarks1), warped_mask],axis=0)
-cv2.imshow("combined mask", combined_mask)
+#cv2.imshow("combined mask", combined_mask)
 
 warped_im2 = warp_im(im2, M, im1.shape)
-cv2.imshow("warped im2", warped_im2)
+#cv2.imshow("warped im2", warped_im2)
 
 warped_corrected_im2 = correct_colours(im1, warped_im2, landmarks1)
-cv2.imshow("warped color corrected im2", warped_corrected_im2/255.)
+#cv2.imshow("warped color corrected im2", warped_corrected_im2/255.)
 
-cv2.imshow("1-combined mask", (1.0 - combined_mask))
+#cv2.imshow("1-combined mask", (1.0 - combined_mask))
 cv2.imshow("im1*(1-comb_mask)", (im1 * (1.0 - combined_mask))/255.)
 cv2.imshow("warp_im2 * comb_mask", (warped_corrected_im2 * combined_mask)/255.)
 output_im = im1 * (1.0 - combined_mask) + warped_corrected_im2 * combined_mask
@@ -264,4 +262,4 @@ cv2.imshow("original2", im2)
 cv2.imshow("image", output_im/255.)
 cv2.waitKey(0)
 #cv2.imwrite('output1.jpg', output_im)
-
+cv2.destroyAllWindows()

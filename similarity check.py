@@ -190,3 +190,4 @@ if __name__ == "__main__":
         
         showImage_more(img=img, text=str(k) + "-" + str(distance_val), gray=False)
     cv2.waitKey(0)
+    cv2.destroyAllWindows()
