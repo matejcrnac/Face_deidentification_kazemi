@@ -265,11 +265,18 @@ deidentifiedImages = "/home/matej/Diplomski/baze/deidentification_destination"
 databaseImages_2 = "/home/matej/Diplomski/baze/baza_deidentification_Images_2"
 databaseImages_3 = "/home/matej/Diplomski/baze/baza_deidentification_Images_3"
 
-SPECIFIC_DISTANCES = [[36, 39], [42, 45], [17, 36], [26, 45], [21, 39], [22, 42], [17, 21], [22, 26], [33, 39], [33, 42], 
-                        [39, 42], [36, 45], [49, 55], [48, 54], [0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10], 
-                        [7, 9], [57, 8], [50, 61], [51, 62], [52, 63], [56, 65], [57, 66], [58, 67], [32, 50], [34, 52], 
-                        [3, 46], [54, 13]]
+EYES_EDGES = [[36, 39], [42, 45], [36, 42], [36, 45], [39, 42], [39, 45]]
+EYES_IRIS = [[37, 41], [37, 40], [38, 40], [38, 41], [43, 47], [43, 46], [44, 46], [44, 47]]
+EYEBROWS = [[17, 18], [18, 19], [19, 20], [20, 21], [17, 21], [22, 23], [23, 24], [24, 25], [25, 26], [22, 26], [17, 26]]
+EYES_EYEBROWS = [[17, 36], [21, 39], [22, 42], [26, 45], [17, 39], [21, 36], [22, 45], [26, 42]]
+NOSE = [[27, 30], [30, 33], [31, 32], [32, 34], [34, 35]]
+EYES_NOSE = [[33, 36], [33, 39], [33, 42], [33, 45]]
+MOUTH_OUTER = [[48, 54], [49, 59], [50, 58], [51, 57], [52, 56], [53, 55], [49, 55], [53, 59]]
+MOUTH_THICKNESS = [[51, 61], [57, 64], [49, 60], [50, 60], [52,62], [53, 62], [55, 63], [56, 63], [58, 65], [59, 65]]
+NOSE_MOUTH = [[33, 48], [33, 54], [33, 51], [31, 48], [35, 54]]
+EYES_MOUTH = [[36, 48], [39, 47], [42, 54], [45, 54]]
 
+SPECIFIC_DISTANCES = EYES_EDGES + EYES_IRIS + EYEBROWS + EYES_EYEBROWS + NOSE + EYES_NOSE + MOUTH_OUTER + MOUTH_THICKNESS + NOSE_MOUTH + EYES_MOUTH
 
 if __name__ == "__main__":
 
@@ -322,6 +329,7 @@ if __name__ == "__main__":
         
         templates_number = len(sorted_closest_indexes)
         
+
         for k in range(1, templates_number+1):
             
             closest_Index = sorted_closest_indexes[k-1][0]
@@ -331,17 +339,7 @@ if __name__ == "__main__":
             faceswaper = FaceSwap(imagePath, closest_Image_path)
             image = faceswaper.swap_face()
             
-             
-            img_orig = cv2.imread(imagePath, cv2.IMREAD_COLOR)
-            cv2.putText(img_orig,"original" , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
-            imname_orig = destination_new + imageName + "_original" + ".ppm"
-            cv2.imwrite(imname_orig, img_orig)
-            
-            img_orig2 = cv2.imread(closest_Image_path, cv2.IMREAD_COLOR)
-            cv2.putText(img_orig2,"original2" , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
-            imname_orig2 = destination_new + imageName + "_original2" + ".ppm"
-            cv2.imwrite(imname_orig2, img_orig2)
-            
+
             cv2.putText(image,"k="+str(k) , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
             imname = destination_new + imageName + "_k_" + str(k) + ".ppm"
             cv2.imwrite(imname, image)
@@ -352,8 +350,6 @@ if __name__ == "__main__":
             
             #cv2.waitKey(0)
         del image
-        del img_orig
-        del img_orig2
         del detector
 
 
