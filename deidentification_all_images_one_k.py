@@ -2,6 +2,7 @@ from FacialLandmarkDetection import *
 from Database_loader import *
 import collections
 from FaceSwaper import *
+import numpy as np
 from voting_gender_classifier import *
 
 #This program has 5 operations. Chose operation int the bottom. Description of each operation is given in the bottom.
@@ -110,9 +111,6 @@ def getTemplatePaths(templates_folder, extension):
 def loadTemplatesPositions(templates_folder):
     positions = []
     fileNames = getTemplatePaths(templates_folder, "txt")
-    if len(fileNames) == 0:
-        print("No txt files present. Please check if you have generated face landmarks files!!")
-        exit()
     base = []
     for fileName in fileNames:
         position = []
@@ -245,12 +243,21 @@ woman_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentifi
 
 
 XMVTS2_database = "/home/matej/Diplomski/baze/baza_XMVTS2"
-destination = "/home/matej/Diplomski/baze/baza_deidentification_Images"
+destination = "/home/matej/Diplomski/baze/deidentification_destination"
+
+database_deidentification_folder = "/home/matej/Diplomski/baze/deidentification_database/baza_deidentification_Images"
+
+
 templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
-templates_database_man = "/home/matej/Diplomski/baze/Templates/man_all"
-templates_database_woman = "/home/matej/Diplomski/baze/Templates/woman_all"
+
+templates_man_no_glasses = "/home/matej/Diplomski/baze/Templates/man_no_glasses"
+templates_man_no_glasses_destination = "/home/matej/Diplomski/baze/Templates/man_no_glasses_Kazemi"
+
 
 templates_destination = "/home/matej/Diplomski/baze/KazemiTemplates"
+
+templates_database_man = "/home/matej/Diplomski/baze/Templates/man_all"
+templates_database_woman = "/home/matej/Diplomski/baze/Templates/woman_all"
 
 XMVTS2_gray_faceReq = "/home/matej/Diplomski/baze/baza_XMVTS2_gray_facereq"
 
@@ -263,60 +270,87 @@ SPECIFIC_DISTANCES = [[36, 39], [42, 45], [17, 36], [26, 45], [21, 39], [22, 42]
                         [7, 9], [57, 8], [50, 61], [51, 62], [52, 63], [56, 65], [57, 66], [58, 67], [32, 50], [34, 52], 
                         [3, 46], [54, 13]]
 
-model1_path = "gender_models/gender_detection_keras.model"
-model2_path = "gender_models/svm_model.pkl"
-model3_path = "gender_models/generator_model.hdf5"
 
 if __name__ == "__main__":
 
-    imagePath = getImagePath(man_no_glasses,"011") #image folder,image name
-    
-    #find gender
-    gender_detector = VotingGenderDetector(model1_path, model2_path, model3_path)
-    gender = gender_detector.predict_label(imagePath)
-    if gender == "man":
-        templates_database = templates_database_man
-    else:
-        templates_database = templates_database_woman
-        
-    (base, templates_positions) = loadTemplatesPositions(templates_database)#load positions of template from txt file
-    if len(templates_positions) == 0:
-        print("No loaded templates!!")
-        exit()
-    base_position = numpy.matrix([[p[0], p[1]] for p in base])
-    
-    detector = FacialLandmarkDetector(imagePath)
-    detector.warpe_image(base_positions = base_position)
-    
-    image_positions_non_norm = detector.detectFacialLandmarks(draw=False, normalize = True, numpy_format = False)
-    image_positions = detector.normalize(image_positions_non_norm)
+    database_folder = database_deidentification_folder
+    loader = DatabaseLoaderXMVTS2(database_folder)
+    images_paths = loader.loadDatabase("ppm", "1")
     
     #method = "landmarks_diff"
     #method = "landmarks_distances_all"
-    #method = "landmar_distances_spec"
-    sorted_closest_indexes = find_closest_Image_sorted_list(image_positions, templates_positions,method = "landmarks_diff",  k=4) #find k-th closest image index
+    method = "landmar_distances_spec"
 
-    k = 1
-    
-    closest_Index = sorted_closest_indexes[k-1][0]
-    
-    closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index]
-    print(closest_Image_path)
-    
-    faceswaper = FaceSwap(imagePath, closest_Image_path)
-    image = faceswaper.swap_face()
-    
-    
-    #replaceEyeRegionOfImageWithTemplate(imagePath, closest_Image_path, parts = ["EyeRegion", "Nose", "Mouth"])
-    img_orig = cv2.imread(imagePath, cv2.IMREAD_COLOR)
-    showImage_more(img=img_orig, text="original", gray=False)
-    img_orig2 = cv2.imread(closest_Image_path, cv2.IMREAD_COLOR)
-    showImage_more(img=img_orig2, text="original2", gray=False)
-    
-    showImage_more(img=image/255., text="k = " + str(k), gray=False)
-    cv2.waitKey(0)
-    #cv2.imshow("deidentified", image/255.)
-    #cv2.waitKey(0)
+    destination = destination + "/deidentification_destination_all_images_" + method + "/"
+    if not os.path.exists(destination):
+        os.makedirs(destination)
+
+    model1_path = "gender_models/gender_detection_keras.model"
+    model2_path = "gender_models/svm_model.pkl"
+    model3_path = "gender_models/generator_model.hdf5"
+
+    gender_detector = VotingGenderDetector(model1_path, model2_path, model3_path)
+
+    for imagePath in images_paths:
+        
+        #find gender
+        gender = gender_detector.predict_label(imagePath)
+        if gender == "man":
+            templates_database = templates_database_man
+        else:
+            templates_database = templates_database_woman       
+        (base, templates_positions) = loadTemplatesPositions(templates_database)#load positions of template from txt file
+        if len(templates_positions) == 0:
+            print("No loaded templates!! Please check if you have generated face landmarks for templates.")
+            exit()
+        base_position = numpy.matrix([[p[0], p[1]] for p in base])
+        
+        detector = FacialLandmarkDetector(imagePath)
+        detector.warpe_image(base_positions = base_position)
+        
+        image_positions_non_norm = detector.detectFacialLandmarks(draw=False, normalize = True, numpy_format = False)
+        image_positions = detector.normalize(image_positions_non_norm)
+        
+        sorted_closest_indexes = find_closest_Image_sorted_list(image_positions, templates_positions,method = method,  k=4) #find k-th closest image index
+
+        imageName = imagePath.split("/")[-1].split("_")[0]
+        
+        
+        templates_number = len(sorted_closest_indexes)
+        
+        for k in range(1, 2):
+            
+            closest_Index = sorted_closest_indexes[k-1][0]
+            
+            closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index]
+            
+            faceswaper = FaceSwap(imagePath, closest_Image_path)
+            image = faceswaper.swap_face()
+            
+             
+            img_orig = cv2.imread(imagePath, cv2.IMREAD_COLOR)
+            cv2.putText(img_orig,"original" , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
+            
+            img_orig2 = cv2.imread(closest_Image_path, cv2.IMREAD_COLOR)
+            cv2.putText(img_orig2,"original2" , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
+            cv2.putText(image,"k="+str(k) , (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
+            
+            out = np.concatenate((img_orig, image), axis=1)
+
+            out = np.concatenate((out, img_orig2), axis=1)
+            
+            imname = destination + imageName + "k_" + str(k+1) + ".ppm"
+            cv2.imwrite(imname, out)
+            print("Finished image" + str(k))
+            #cv2.imshow("deidentified", image/255.)
+                        
+            
+            #cv2.waitKey(0)
+        del image
+        del img_orig
+        del img_orig2
+        del out
+        del detector
 
 
 

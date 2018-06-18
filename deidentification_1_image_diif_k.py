@@ -3,6 +3,7 @@ from Database_loader import *
 import collections
 from FaceSwaper import *
 import numpy as np
+from voting_gender_classifier import *
 
 #This program has 5 operations. Chose operation int the bottom. Description of each operation is given in the bottom.
 
@@ -251,6 +252,9 @@ templates_man_no_glasses_destination = "/home/matej/Diplomski/baze/Templates/man
 
 templates_destination = "/home/matej/Diplomski/baze/KazemiTemplates"
 
+templates_database_man = "/home/matej/Diplomski/baze/Templates/man_all"
+templates_database_woman = "/home/matej/Diplomski/baze/Templates/woman_all"
+
 XMVTS2_gray_faceReq = "/home/matej/Diplomski/baze/baza_XMVTS2_gray_facereq"
 
 deidentifiedImages = "/home/matej/Diplomski/baze/deidentification_destination"
@@ -265,11 +269,23 @@ SPECIFIC_DISTANCES = [[36, 39], [42, 45], [17, 36], [26, 45], [21, 39], [22, 42]
 
 if __name__ == "__main__":
 
-    imagePath = getImagePath(man_glasses,"013") #image folder,image name
+    imagePath = getImagePath(man_no_glasses,"001") #image folder,image name
     
-    (base, templates_positions) = loadTemplatesPositions(templates_man_no_glasses)#load positions of template from txt file
+    #find gender
+    model1_path = "gender_models/gender_detection_keras.model"
+    model2_path = "gender_models/svm_model.pkl"
+    model3_path = "gender_models/generator_model.hdf5"
+
+    gender_detector = VotingGenderDetector(model1_path, model2_path, model3_path)
+    gender = gender_detector.predict_label(imagePath)
+    if gender == "man":
+        templates_database = templates_database_man
+    else:
+        templates_database = templates_database_woman
+    
+    (base, templates_positions) = loadTemplatesPositions(templates_database)#load positions of template from txt file
     if len(templates_positions) == 0:
-        print("No loaded templates!!")
+        print("No loaded templates!! Please check if you have generated face landmarks for templates.")
         exit()
     base_position = numpy.matrix([[p[0], p[1]] for p in base])
     
@@ -286,7 +302,7 @@ if __name__ == "__main__":
 
     imageName = imagePath.split("/")[-1].split("_")[0]
     
-    destination = destination + "/deidentification_destination_man_glasses_2_no_glasses_" + method  +"_"+ imageName + "/"
+    destination = destination + "/deidentification_destination_gender_detect_" + method  +"_"+ imageName + "/"
     if not os.path.exists(destination):
         os.makedirs(destination)
     
@@ -296,7 +312,7 @@ if __name__ == "__main__":
         
         closest_Index = sorted_closest_indexes[k-1][0]
         
-        closest_Image_path = getTemplatePaths(templates_man_no_glasses, "ppm")[closest_Index]
+        closest_Image_path = getTemplatePaths(templates_database, "ppm")[closest_Index]
         
         faceswaper = FaceSwap(imagePath, closest_Image_path)
         image = faceswaper.swap_face()

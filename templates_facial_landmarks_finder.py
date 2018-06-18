@@ -4,28 +4,6 @@ from Database_loader import *
 #This program has 5 operations. Chose operation int the bottom. Description of each operation is given in the bottom.
 
 
-#Used paths
-man_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/man_no_glasses"
-man_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/man_glasses"
-woman_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_no_glasses"
-woman_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_glasses"
-
-
-XMVTS2_database = "/home/matej/Diplomski/baze/baza_XMVTS2"
-destination = "/home/matej/Diplomski/baze/baza_deidentification_Images"
-
-
-templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
-templates_destination = "/home/matej/Diplomski/baze/Templates/KazemiTemplates"
-
-templates_man_no_glasses = "/home/matej/Diplomski/baze/Templates/man_no_glasses"
-templates_man_no_glasses_destination = "/home/matej/Diplomski/baze/Templates/man_no_glasses_Kazemi"
-
-XMVTS2_gray_faceReq = "/home/matej/Diplomski/baze/baza_XMVTS2_gray_facereq"
-
-deidentifiedImages = "/home/matej/Diplomski/baze/deidentification_destination"
-databaseImages_2 = "/home/matej/Diplomski/baze/baza_deidentification_Images_2"
-databaseImages_3 = "/home/matej/Diplomski/baze/baza_deidentification_Images_3"
 
 #--------------------------------------METHODS------------------------------------------------------------------------
 
@@ -92,6 +70,35 @@ def getImagePath(database_folder, imageName):
     return imagePath
 
 
+#Used paths
+man_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/man_no_glasses"
+man_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/man_glasses"
+woman_no_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_no_glasses"
+woman_glasses = "/home/matej/Diplomski/baze/deidentification_database/Deidentification_main/woman_glasses"
+
+
+XMVTS2_database = "/home/matej/Diplomski/baze/baza_XMVTS2"
+destination = "/home/matej/Diplomski/baze/baza_deidentification_Images"
+
+
+templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
+templates_destination = "/home/matej/Diplomski/baze/Templates/KazemiTemplates"
+
+templates_man_no_glasses = "/home/matej/Diplomski/baze/Templates/man_no_glasses"
+templates_man_no_glasses_destination = "/home/matej/Diplomski/baze/Templates/man_no_glasses_Kazemi"
+
+templates_man_all = "/home/matej/Diplomski/baze/Templates/man_all"
+templates_man_all_destination = "/home/matej/Diplomski/baze/Templates/man_all_Kazemi"
+
+templates_woman_all = "/home/matej/Diplomski/baze/Templates/woman_all"
+templates_woman_all_destination = "/home/matej/Diplomski/baze/Templates/woman_all_Kazemi"
+
+XMVTS2_gray_faceReq = "/home/matej/Diplomski/baze/baza_XMVTS2_gray_facereq"
+
+deidentifiedImages = "/home/matej/Diplomski/baze/deidentification_destination"
+databaseImages_2 = "/home/matej/Diplomski/baze/baza_deidentification_Images_2"
+databaseImages_3 = "/home/matej/Diplomski/baze/baza_deidentification_Images_3"
+
 if __name__ == "__main__":
 
     #templates_database = "/home/matej/Diplomski/baze/Templates/baza_templates"
@@ -99,6 +106,6 @@ if __name__ == "__main__":
 
     #templates_destination = "/home/matej/Diplomski/baze/Templates/KazemiTemplates"
 
-    findFacialLandmarksOnTemplateImages(templates_man_no_glasses, templates_man_no_glasses_destination, warp = True, showImages = False, store=True, storePositions = True)
+    findFacialLandmarksOnTemplateImages(templates_man_all, templates_man_all_destination, warp = True, showImages = False, store=True, storePositions = True)
 
 
